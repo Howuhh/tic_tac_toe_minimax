@@ -37,6 +37,7 @@ def update_board(board, player: int, move: int) -> List[List[int]]:
         return None
 
 
+# check win after move (problem for minimax -> no initial move for bot turn in recursion)
 def check_win(board, player: int, move: int) -> bool:
     row, col = move // 3, move % 3
     rows, cols, diags, ndiags = 0, 0, 0, 0
@@ -56,7 +57,7 @@ def check_win(board, player: int, move: int) -> bool:
         win = player
 
     return win
-
+    
 
 def check_tie(board):
     if len(possible_moves(board)) == 0:

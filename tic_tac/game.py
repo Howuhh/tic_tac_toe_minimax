@@ -1,10 +1,11 @@
 import pyfiglet
 
 from random import randint
+from time import time
 from itertools import count
 
 from .board import new_board, update_board, check_win, check_tie, print_board, print_example
-from .ai_player import ai_move_random
+from .ai_player import Bot
 
 
 class Game:
@@ -56,10 +57,15 @@ class Game:
         return new_board
 
     def _bot_turn(self, board, player):
-        bot_move = ai_move_random(board)
-        print(f"({self.it}) BOT MOVE: {bot_move}")
+        new_bot = Bot(self.side_value[player])
+        
+        start_time = time()
+        bot_move = new_bot.move_minimax(board, new_bot.player)
+        end_time = round(time() - start_time, 2)
+        
+        print(f"({self.it}) BOT MOVE ({end_time}s): {bot_move}")
 
-        new_board = self._game_turn(board, self.side_value[player], bot_move)
+        new_board = self._game_turn(board, new_bot.player, bot_move)
 
         # check end state
         if type(new_board) != list:
