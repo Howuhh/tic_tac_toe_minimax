@@ -6,7 +6,7 @@ def new_board(n=3):
     return [[0 for j in range(n)] for i in range(n)]
 
 
-def print_example():
+def print_example() -> None:
     board = [[0, 1, 2], [3, 4, 5], [6, 7, 8]]
 
     def print_row(board_row):
@@ -53,7 +53,7 @@ def check_win(board, player: int, move: int) -> bool:
             ndiags += 1
     
     if rows == 3 or cols == 3 or diags == 3 or ndiags == 3:
-        win = (-1 if player == "X" else 1)
+        win = player
 
     return win
 
