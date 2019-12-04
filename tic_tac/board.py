@@ -1,8 +1,6 @@
 # from typing import Tuple
 from typing import List
 
-from utils import eval_board_state
-
 
 def new_board(n=3):
     return [[0 for j in range(n)] for i in range(n)]
@@ -28,8 +26,6 @@ def update_board(board, player: int, move: int) -> List[List[int]]:
     else:
         print("Invalid move! Not the blank spot.")
         return None
-
-def game_state(board,)
 
 
 def check_win(board, player: int, move: int) -> bool:

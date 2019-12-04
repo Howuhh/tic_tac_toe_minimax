@@ -8,6 +8,7 @@ class Game:
     def __init__(self, n=3):
         self.board = new_board(n=n)
         self.game_states = {-1: "Player X win!", 0: "Tie!", 1: "Player O win!"}
+        self.side_value = {"O": 1, "X": -1}
 
     def _game_turn(self, board, player: int, move: int):
         new_board = None
@@ -26,6 +27,36 @@ class Game:
             return new_board
 
     # TODO: who goes first, main game loop, ending, game state is weird now
+    def start_game(self):
+        game_board = self.board.copy()
+        goes_first = randint(0, 1)
+
+        human_player = str(input("Choose side: "))
+        bot_player = "O" if human_player == "X" else "X"
+
+        while True:
+            if goes_first == 1:
+                # player first
+                print("Player first!")
+
+                player_move = int(input("YOUR MOVE (0 to 8): "))
+                
+                new_board = self._game_turn(game_board, self.side_value[human_player], player_move)
+
+                # TODO: add check for end state and break loop
+
+
+
+                print(human_player)
+                print(bot_player)
+                print("-"*18)
+            else:
+                # ai first
+                print("Bot first!")
+                print(bot_player)
+                print(human_player)
+                print("-"*18)
+
 
 
 
@@ -73,4 +104,6 @@ class Game:
 
 
 if __name__ == "__main__":
-    pass 
+    game = Game()
+
+    game.start_game()
