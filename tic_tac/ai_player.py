@@ -10,3 +10,6 @@ def ai_move_random(board):
 
     return moves[move]
 
+
+def minimax_move(board, player, move):
+    pass

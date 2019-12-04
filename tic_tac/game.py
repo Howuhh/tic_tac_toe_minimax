@@ -1,20 +1,30 @@
+import pyfiglet
+
 from random import randint
 
-from board import new_board, update_board, check_win, check_tie
+from board import new_board, update_board, check_win, check_tie, print_board, print_example
 from ai_player import ai_move_random
 
 
 class Game:
     def __init__(self, n=3):
         self.board = new_board(n=n)
+
         self.game_states = {-1: "Player X win!", 0: "Tie!", 1: "Player O win!"}
         self.side_value = {"O": 1, "X": -1}
 
-    def _game_turn(self, board, player: int, move: int):
-        new_board = None
+        self.ascii_hello = pyfiglet.figlet_format("Tic Tac Toe Game", width=60)
+        self.ascii_end = pyfiglet.figlet_format("The End", width=60)
 
-        while new_board is None:
-            new_board = update_board(board, player, move)
+    def _game_turn(self, board, player: int, move: int):
+        new_board = update_board(board, player, move)
+
+        # invalid move check
+        if new_board is None:
+            while new_board is None:
+                print("Invalid move! Not the blank spot.")
+                new_move = int(input("YOUR MOVE (0 to 8): "))
+                new_board = update_board(board, player, new_move)
 
         win = check_win(new_board, player, move)
         tie = check_tie(new_board)
@@ -26,81 +36,88 @@ class Game:
         else:
             return new_board
 
-    # TODO: who goes first, main game loop, ending, game state is weird now
+    def _human_turn(self, board, player):
+        player_move = int(input("YOUR MOVE (0 to 8): "))
+        
+        new_board = self._game_turn(board, self.side_value[player], player_move)
+
+        # check end state
+        if type(new_board) != list:
+            print(new_board)
+            print(self.ascii_end)
+            return None
+
+        return new_board
+
+    def _bot_turn(self, board, player):
+        bot_move = ai_move_random(board)
+        print(f"BOT MOVE: {bot_move}")
+
+        new_board = self._game_turn(board, self.side_value[player], bot_move)
+
+        # check end state
+        if type(new_board) != list:
+            print(new_board)
+            print(self.ascii_end)
+            return None
+
+        return new_board
+
     def start_game(self):
+        print(self.ascii_hello)
+        
+        print("-"*20)
+        print("Board positions:")
+        print_example()
+        print("-"*20)
+
         game_board = self.board.copy()
         goes_first = randint(0, 1)
 
         human_player = str(input("Choose side: "))
         bot_player = "O" if human_player == "X" else "X"
 
+        if goes_first == 1:
+            print("Human goes first!")
+        else:
+            print("Bot goes first!")
+        print("-"*20)
+
         while True:
             if goes_first == 1:
-                # player first
-                print("Player first!")
+                new_board = self._human_turn(game_board, human_player)
 
-                player_move = int(input("YOUR MOVE (0 to 8): "))
+                if new_board is None:
+                    break
+
+                new_board = self._bot_turn(new_board, bot_player)
+
+                if new_board is None:
+                    break
+
+                print("-"*20)
+                print_board(new_board)
+                print("-"*20)
                 
-                new_board = self._game_turn(game_board, self.side_value[human_player], player_move)
-
-                # TODO: add check for end state and break loop
-
-
-
-                print(human_player)
-                print(bot_player)
-                print("-"*18)
+                game_board = new_board
             else:
-                # ai first
-                print("Bot first!")
-                print(bot_player)
-                print(human_player)
-                print("-"*18)
+                new_board = self._bot_turn(game_board, bot_player)
 
+                if new_board is None:
+                    break
 
+                new_board = self._human_turn(new_board, human_player)
 
+                if new_board is None:
+                    break
 
-
-
-# def game_turn(board: Board, player: str, move: int):
-#     game_win = board.update_board(player=player, move=move)
-
-#     if game_win:
-#         print(f"Player {player} win!")
-#         return 1
-#     elif check_tie(board.get_board()):
-#         print("Tie!")
-#         return 0
-#     else:
-#         return game_win
-
-# def start_game():
-#     board = Board()
-
-#     player = input("Choose side (O or X): ")
-#     print("-"*18)
-#     bot_player = "O" if player == "X" else "X"
-
-#     while True:
-#         # Player move
-#         game_win = None
-
-#         # if move is not valid
-#         while game_win is None:
-#             player_move = int(input("YOUR MOVE (1 to 9): "))
-            
-#             game_win = game_turn(board, player, player_move - 1)
-
-#         board.print_board()
- 
-#         # BOT move
-#         bot_move = ai_move_random(board.get_board())
-
-#         print("-"*18)
-#         print(f"BOT MOVE: {bot_move}")
-#         game_win = game_turn(board, bot_player, bot_move)
-#         board.print_board()
-
+                print("-"*20)
+                print_board(new_board)
+                print("-"*20)
+                
+                game_board = new_board
+        
+        print(self.ascii_end)
 
 
 if __name__ == "__main__":
