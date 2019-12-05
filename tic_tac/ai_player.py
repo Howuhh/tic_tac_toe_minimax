@@ -12,7 +12,6 @@ except ModuleNotFoundError:
 class Bot():
     def __init__(self, player: int):
         self.player = player
-        # self.op_player = 1 if player == -1 else 1
 
     def move_random(self, board):
         moves = possible_moves(board)

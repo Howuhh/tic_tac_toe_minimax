@@ -7,16 +7,6 @@ def new_board(n=3):
     return [[0 for j in range(n)] for i in range(n)]
 
 
-def print_example() -> None:
-    board = [[0, 1, 2], [3, 4, 5], [6, 7, 8]]
-
-    def print_row(board_row):
-        row = "|".join([str(i) for i in board_row])
-        print(row)
-
-    return [print_row(row) for row in board]
-
-
 def print_board(board) -> None:
     symbols = {0: " ", -1: "X", 1: "O"}
 
@@ -100,20 +90,6 @@ def check_valid_move(board, move: int) -> bool:
         return True
     else:
         return False
-
-
-if __name__ == "__main__":
-    test_board = [
-        [1, 1, -1],
-        [-1, -1, 1],
-        [1, 1, -1]
-    ]
-
-    print_board(test_board)
-    print(check_win(test_board, 1))
-    print(check_win(test_board, -1))
-    print(game_over(test_board))
-
 
 
 # TODO: delet this func and rewrite game class
