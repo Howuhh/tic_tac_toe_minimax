@@ -5,12 +5,21 @@ from random import randint
 from time import time
 from itertools import count
 
-from .board import new_board, update_board, check_win, check_tie, print_board, print_example
-from .ai_player import Bot
+try:
+    from .board import new_board, update_board, check_win, check_tie, print_board, print_example
+    from .ai_player import Bot
+except ModuleNotFoundError:
+    from board import new_board, update_board, check_win, check_tie, print_board, print_example
+    from ai_player import Bot
 
 
 class Game:
-    def __init__(self, n=3):
+    def __init__(self, n=3, bot_type="random"):
+        self.bot_type = bot_type
+
+        if bot_type not in ("random", "minimax"):
+            raise NameError("Only random and minimax bot available")
+
         self.board = new_board(n=n)
         self.it = None
 
@@ -20,42 +29,6 @@ class Game:
         self.ascii_hello = pyfiglet.figlet_format("Tic Tac Toe Game", width=60)
         self.ascii_end = pyfiglet.figlet_format("The End", width=60)
 
-    def _game_turn(self, board, human_player: str, goes_first: int):
-        player = self.side_value[human_player]
-        new_board = None
-
-        if goes_first == player:
-            new_board = self._human_turn(board, player)
-            print_board(new_board)
-            
-            if check_win(new_board, player):
-                return player
-
-
-            new_board = self._bot_turn(new_board, player * -1)
-            print_board(new_board)
-
-            if check_win(new_board, player * -1):
-                return player * -1
-        else:
-            new_board = self._bot_turn(board, player * -1)
-            print_board(new_board)
-            
-            if check_win(new_board, player * -1):
-                return player * -1
-
-
-            new_board = self._human_turn(new_board, player)
-            print_board(new_board)
-
-            if check_win(new_board, player):
-                return player
-
-        if check_tie(new_board):
-            return 0
-        
-        return new_board
-    
     def _human_turn(self, board, player: int):
         player_move = int(input(f"({self.it}) YOUR MOVE (0 to 8): "))
         
@@ -74,7 +47,13 @@ class Game:
         bot = Bot(player)
         
         start_time = time()
-        bot_move = bot.move_random(board)
+        
+        if self.bot_type == "random":
+            bot_move = bot.move_random(board)
+        else:
+            bot_move = bot.move_minimax(board, player)[1]
+            
+        
         end_time = round(time() - start_time, 2)
         
         print(f"({self.it}) BOT MOVE ({end_time}s): {bot_move}")
@@ -82,18 +61,54 @@ class Game:
 
         return new_board
 
+    def _game_turn(self, board, human_player: str, goes_first: int):
+        player = self.side_value[human_player]
+        new_board = None
+
+        if goes_first == player:
+            new_board = self._human_turn(board, player)
+            print_board(new_board)
+            
+            if check_win(new_board, player):
+                return player
+
+            new_board = self._bot_turn(new_board, player * -1)
+            print_board(new_board)
+
+            if check_win(new_board, player * -1):
+                return player * -1
+        else:
+            new_board = self._bot_turn(board, player * -1)
+            print_board(new_board)
+            
+            if check_win(new_board, player * -1):
+                return player * -1
+
+            new_board = self._human_turn(new_board, player)
+            print_board(new_board)
+
+            if check_win(new_board, player):
+                return player
+
+        if check_tie(new_board):
+            return 0
+        
+        return new_board
+
     def start_game(self):
         print(self.ascii_hello)
         
-        print("-"*25)
-        print("Board positions:")
-        print_example()
-        print("-"*25)
+        print("-"*48)
 
         game_board = self.board.copy()
         goes_first = randint(0, 1)
 
         human_player = str(input("Choose side: "))
+
+        if human_player not in ("O", "X"):
+            while human_player not in ("O", "X"):
+                print("Not an option! Please, choose O or X.")
+                human_player = str(input("Choose side: "))
 
         if goes_first == 1:
             print("Human goes first!")
@@ -114,7 +129,8 @@ class Game:
 
         print(self.ascii_end)
 
+
 if __name__ == "__main__":
-    game = Game()
+    game = Game(bot_type="blabla")
 
     game.start_game()

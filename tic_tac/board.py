@@ -38,14 +38,13 @@ def update_board(board, player: int, move: int) -> List[List[int]]:
         return None
 
 
-# TODO: человек всегда должен получить - а комп плюс -: либо вынести в константы и убрать аргумент либо всегда передавать только player бота
 def game_score(board, player):
     if check_win(board, player):
-        return 10
+        return [10, None]
     elif check_win(board, player * -1):
-        return -10
+        return [-10, None]
     else:
-        return 0
+        return [0, None]
 
 
 def game_over(board):

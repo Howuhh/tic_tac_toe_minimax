@@ -1,12 +1,12 @@
 from copy import deepcopy
 
-from random import randint
+from random import choice, randint
 from math import inf
 
 try:
-    from .board import possible_moves, check_win, check_tie, print_board
+    from .board import possible_moves, print_board, game_over, game_score
 except ModuleNotFoundError:
-    from board import possible_moves, check_win, check_tie, print_board
+    from board import possible_moves, check_win, print_board, check_tie, game_over, game_score
 
 
 class Bot():
@@ -20,63 +20,53 @@ class Bot():
 
         return moves[move]
 
-    def move_minimax(self, board, player: int, move: int=None, depth=0):
-        # print(depth)
-        # check base
-        if depth > 0:
-            if check_win(board, player, move):
-                if player == self.player:
-                    # print("Bot win!")
-                    return 10
-                else:
-                    # print("Human win!")
-                    return -10
-            elif check_tie(board):
-                return 0
+    def move_minimax(self, board, player, depth=0):
+        if game_over(board):
+            return game_score(board, self.player)
 
         moves = possible_moves(board)
 
+        # first move
         if len(moves) == 9:
-            return 0
+            # angles 
+            move = choice([0, 2, 6, 8])
+            return [0, move]
 
         if player == self.player:
-            best_move = None
-            maxScore = -inf
-            
-            for new_move in moves:
+            maxEval = [-inf, None]
+
+            for move in moves:
                 new_board = deepcopy(board)
+                row, col = move // 3,  move % 3
 
-                row, col = new_move // 3, new_move % 3
                 new_board[row][col] = player
+                score = self.move_minimax(new_board, player * -1, depth+1)
 
-                score = self.move_minimax(new_board, player * -1, new_move, depth + 1)
-
-                if score > maxScore:
-                    maxScore = score
-                    best_move = new_move
-            return best_move
+                if score[0] >= maxEval[0]:
+                    maxEval = score
+                    maxEval[1] = move
+            return maxEval
         else:
-            best_move = None
-            minScore = inf
-            
-            for new_move in moves:
+            minEval = [inf, None]
+
+            for move in moves:
                 new_board = deepcopy(board)
+                row, col = move // 3,  move % 3
 
-                row, col = new_move // 3, new_move % 3
                 new_board[row][col] = player
+                score = self.move_minimax(new_board, player * -1, depth+1)
 
-                score = self.move_minimax(new_board, player * -1, new_move, depth + 1)
-                
-                if score < minScore:
-                    minScore = score
-                    best_move = new_move
-            return best_move
+                if score[0] <= minEval[0]:
+                    minEval = score
+                    minEval[1] = move
+
+            return minEval
 
 
 if __name__ == "__main__":
     test_board = [
         [1, 1, 0],
-        [-1, 0, 1],
+        [-1, 1, 1],
         [0, -1, -1]
     ]
 
