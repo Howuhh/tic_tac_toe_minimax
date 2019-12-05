@@ -1,4 +1,5 @@
 import pyfiglet
+import sys
 
 from random import randint
 from time import time
@@ -19,110 +20,99 @@ class Game:
         self.ascii_hello = pyfiglet.figlet_format("Tic Tac Toe Game", width=60)
         self.ascii_end = pyfiglet.figlet_format("The End", width=60)
 
-    def _game_turn(self, board, player: int, move: int):
-        new_board = update_board(board, player, move)
+    def _game_turn(self, board, human_player: str, goes_first: int):
+        player = self.side_value[human_player]
+        new_board = None
+
+        if goes_first == player:
+            new_board = self._human_turn(board, player)
+            print_board(new_board)
+            
+            if check_win(new_board, player):
+                return player
+
+
+            new_board = self._bot_turn(new_board, player * -1)
+            print_board(new_board)
+
+            if check_win(new_board, player * -1):
+                return player * -1
+        else:
+            new_board = self._bot_turn(board, player * -1)
+            print_board(new_board)
+            
+            if check_win(new_board, player * -1):
+                return player * -1
+
+
+            new_board = self._human_turn(new_board, player)
+            print_board(new_board)
+
+            if check_win(new_board, player):
+                return player
+
+        if check_tie(new_board):
+            return 0
+        
+        return new_board
+    
+    def _human_turn(self, board, player: int):
+        player_move = int(input(f"({self.it}) YOUR MOVE (0 to 8): "))
+        
+        new_board = update_board(board, player, player_move)
 
         # invalid move check
         if new_board is None:
             while new_board is None:
                 print("Invalid move! Not the blank spot.")
-                new_move = int(input("YOUR MOVE (0 to 8): "))
-                new_board = update_board(board, player, new_move)
-
-        win = check_win(new_board, player, move)
-        tie = check_tie(new_board)
-
-        print("-"*20)
-        print_board(new_board)
-        print("-"*20)
-
-        if win:
-            return self.game_states[win]
-        elif tie:
-            return self.game_states[0]
-        else:
-            return new_board
-
-    def _human_turn(self, board, player):
-        player_move = int(input(f"({self.it}) YOUR MOVE (0 to 8): "))
-        
-        new_board = self._game_turn(board, self.side_value[player], player_move)
-
-        # check end state
-        if type(new_board) != list:
-            print(new_board)
-            print(self.ascii_end)
-            return None
+                player_move = int(input("YOUR MOVE (0 to 8): "))
+                new_board = update_board(board, player, player_move)
 
         return new_board
 
-    def _bot_turn(self, board, player):
-        new_bot = Bot(self.side_value[player])
+    def _bot_turn(self, board, player: int):
+        bot = Bot(player)
         
         start_time = time()
-        bot_move = new_bot.move_minimax(board, new_bot.player)
+        bot_move = bot.move_random(board)
         end_time = round(time() - start_time, 2)
         
         print(f"({self.it}) BOT MOVE ({end_time}s): {bot_move}")
-
-        new_board = self._game_turn(board, new_bot.player, bot_move)
-
-        # check end state
-        if type(new_board) != list:
-            print(new_board)
-            print(self.ascii_end)
-            return None
+        new_board = update_board(board, bot.player, bot_move)
 
         return new_board
 
     def start_game(self):
-        # TODO: запринтить поле последний раз перед концом/первый раз перед ходом/принтить каждый ход 
         print(self.ascii_hello)
         
-        print("-"*20)
+        print("-"*25)
         print("Board positions:")
         print_example()
-        print("-"*20)
+        print("-"*25)
 
         game_board = self.board.copy()
         goes_first = randint(0, 1)
 
         human_player = str(input("Choose side: "))
-        bot_player = "O" if human_player == "X" else "X"
 
         if goes_first == 1:
             print("Human goes first!")
         else:
             print("Bot goes first!")
-        print("-"*20)
+        print("-"*25)
 
         for it in count():
             self.it = it
-            if goes_first == 1:
-                new_board = self._human_turn(game_board, human_player)
+            new_board = self._game_turn(game_board, human_player, goes_first)
 
-                if new_board is None:
-                    break
+            if type(new_board) != list:
+                print(self.game_states[new_board])
+                break
 
-                new_board = self._bot_turn(new_board, bot_player)
+            game_board = new_board
+            print("-"*25)
 
-                if new_board is None:
-                    break
-                
-                game_board = new_board
-            else:
-                new_board = self._bot_turn(game_board, bot_player)
-
-                if new_board is None:
-                    break
-
-                new_board = self._human_turn(new_board, human_player)
-
-                if new_board is None:
-                    break
-                
-                game_board = new_board
-
+        print(self.ascii_end)
 
 if __name__ == "__main__":
     game = Game()

@@ -37,28 +37,8 @@ def update_board(board, player: int, move: int) -> List[List[int]]:
     else:
         return None
 
-# TODO: delet this func and rewrite game class
-# def check_win(board, player: int, move: int) -> bool:
-#     row, col = move // 3, move % 3
-#     rows, cols, diags, ndiags = 0, 0, 0, 0
-#     win = False
 
-#     for i in range(3):
-#         if board[row][i] == player:
-#             rows += 1
-#         if board[i][col] == player:
-#             cols += 1
-#         if board[i][i] == player:
-#             diags += 1
-#         if board[i][1 - i + 1] == player:
-#             ndiags += 1
-    
-#     if rows == 3 or cols == 3 or diags == 3 or ndiags == 3:
-#         win = player
-
-#     return win
-
-
+# TODO: человек всегда должен получить - а комп плюс -: либо вынести в константы и убрать аргумент либо всегда передавать только player бота
 def game_score(board, player):
     if check_win(board, player):
         return 10
@@ -69,7 +49,7 @@ def game_score(board, player):
 
 
 def game_over(board):
-    return check_win(board, 1) or check_win(board, -1)
+    return check_win(board, 1) or check_win(board, -1) or check_tie(board)
 
 
 def get_diag(board, d: bool=True, n=3) -> List[int]:
@@ -93,8 +73,8 @@ def check_win(board, player: int) -> bool:
         return True
     elif player < 0 and min(sums) == -3:
         return True
-
-    return False
+    else:
+        return False
 
 
 def check_tie(board):
@@ -127,8 +107,33 @@ if __name__ == "__main__":
     test_board = [
         [1, 1, -1],
         [-1, -1, 1],
-        [-1, 1, -1]
+        [1, 1, -1]
     ]
 
     print_board(test_board)
-    print(check_win_full(test_board, -1))
+    print(check_win(test_board, 1))
+    print(check_win(test_board, -1))
+    print(game_over(test_board))
+
+
+
+# TODO: delet this func and rewrite game class
+# def check_win(board, player: int, move: int) -> bool:
+#     row, col = move // 3, move % 3
+#     rows, cols, diags, ndiags = 0, 0, 0, 0
+#     win = False
+
+#     for i in range(3):
+#         if board[row][i] == player:
+#             rows += 1
+#         if board[i][col] == player:
+#             cols += 1
+#         if board[i][i] == player:
+#             diags += 1
+#         if board[i][1 - i + 1] == player:
+#             ndiags += 1
+    
+#     if rows == 3 or cols == 3 or diags == 3 or ndiags == 3:
+#         win = player
+
+#     return win
