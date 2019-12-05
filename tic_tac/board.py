@@ -1,4 +1,5 @@
 # from typing import Tuple
+# import numpy as np
 from typing import List
 
 
@@ -36,28 +37,65 @@ def update_board(board, player: int, move: int) -> List[List[int]]:
     else:
         return None
 
+# TODO: delet this func and rewrite game class
+# def check_win(board, player: int, move: int) -> bool:
+#     row, col = move // 3, move % 3
+#     rows, cols, diags, ndiags = 0, 0, 0, 0
+#     win = False
 
-# check win after move (problem for minimax -> no initial move for bot turn in recursion)
-def check_win(board, player: int, move: int) -> bool:
-    row, col = move // 3, move % 3
-    rows, cols, diags, ndiags = 0, 0, 0, 0
-    win = False
-
-    for i in range(3):
-        if board[row][i] == player:
-            rows += 1
-        if board[i][col] == player:
-            cols += 1
-        if board[i][i] == player:
-            diags += 1
-        if board[i][1 - i + 1] == player:
-            ndiags += 1
+#     for i in range(3):
+#         if board[row][i] == player:
+#             rows += 1
+#         if board[i][col] == player:
+#             cols += 1
+#         if board[i][i] == player:
+#             diags += 1
+#         if board[i][1 - i + 1] == player:
+#             ndiags += 1
     
-    if rows == 3 or cols == 3 or diags == 3 or ndiags == 3:
-        win = player
+#     if rows == 3 or cols == 3 or diags == 3 or ndiags == 3:
+#         win = player
 
-    return win
-    
+#     return win
+
+
+def game_score(board, player):
+    if check_win(board, player):
+        return 10
+    elif check_win(board, player * -1):
+        return -10
+    else:
+        return 0
+
+
+def game_over(board):
+    return check_win(board, 1) or check_win(board, -1)
+
+
+def get_diag(board, d: bool=True, n=3) -> List[int]:
+    if d:
+        return [row[i] for i, row in enumerate(board)]
+    else:
+        return [row[n - 1 - i] for i, row in enumerate(board)]
+
+
+def check_win(board, player: int) -> bool:
+    sums = []
+
+    # row sums
+    sums.extend(list(map(sum, board)))
+    # col sums
+    sums.extend(list(map(sum, zip(*board))))
+    # diag sums
+    sums.extend(list(map(sum, [get_diag(board, d=d) for d in (True, False)])))
+
+    if player > 0 and max(sums) == 3:
+        return True
+    elif player < 0 and min(sums) == -3:
+        return True
+
+    return False
+
 
 def check_tie(board):
     if len(possible_moves(board)) == 0:
@@ -83,3 +121,14 @@ def check_valid_move(board, move: int) -> bool:
         return True
     else:
         return False
+
+
+if __name__ == "__main__":
+    test_board = [
+        [1, 1, -1],
+        [-1, -1, 1],
+        [-1, 1, -1]
+    ]
+
+    print_board(test_board)
+    print(check_win_full(test_board, -1))
